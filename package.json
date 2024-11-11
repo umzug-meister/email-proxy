@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node --experimental-strip-types src/index.ts"
+    "start": "node --experimental-strip-types src/index.ts",
+    "dev": "nodemon"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "gulp": "^5.0.0"
   },
   "type": "module"
 }
