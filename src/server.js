@@ -1,15 +1,10 @@
-import cors from "cors";
-import "dotenv/config";
-import express from "express";
-import rateLimit from "express-rate-limit";
-import { checkApiKey } from "./middleware/checkApiKey.ts";
-import jsonParser from "./middleware/jsonParser.ts";
-import {
-  readHtmlTemplate,
-  replaceTemplateVariables,
-} from "./utils/html-template.ts";
-import { logger } from "./utils/logger.ts";
-import { SendGridMailProvider } from "./provider/SendGridMailProvider.ts";
+const cors = require('cors');
+const express = require('express');
+const rateLimit = require('express-rate-limit');
+const { readHtmlTemplate, replaceTemplateVariables } = require('./utils/html-template');
+const logger = require('./utils/logger');
+const checkApiKey = require('./middleware/checkApiKey');
+const jsonParser = require('./middleware/jsonParser');
 
 const app = express();
 const startTime = new Date().toISOString();
@@ -21,7 +16,7 @@ const limiter = rateLimit({
 });
 
 const corsOptions =
-  nodeEnv === "production"
+  nodeEnv === 'production'
     ? {
         origin: process.env.CORS_ALLOWED_ORIGIN,
         optionsSuccessStatus: 200,
@@ -30,32 +25,32 @@ const corsOptions =
 
 app.use(cors(corsOptions));
 app.use(limiter);
-app.set("view engine", "ejs");
-app.set("views", "./src/views");
+app.set('view engine', 'ejs');
+app.set('views', './src/views');
 
-app.get("/", (_, res) => {
-  res.render("index", { nodeEnv, startTime });
+app.get('/', (_, res) => {
+  res.render('index', { nodeEnv, startTime });
 });
 
-app.post("/send-mail", checkApiKey, jsonParser, (req, res) => {
+app.post('/send-mail', checkApiKey, jsonParser, (req, res) => {
   const { to, subject, variables, templateName } = req.body;
 
   readHtmlTemplate(templateName)
     .then((data) => {
       const html = replaceTemplateVariables(data, variables);
 
-      const msg: any = {
+      const msg = {
         to,
         subject,
         html,
         bcc: process.env.FROM_EMAIL,
         replyTo: {
-          email: process.env.REPLY_TO_EMAIL || "",
-          name: process.env.REPLY_TO_NAME || "",
+          email: process.env.REPLY_TO_EMAIL || '',
+          name: process.env.REPLY_TO_NAME || '',
         },
         from: {
-          email: process.env.FROM_EMAIL || "",
-          name: process.env.FROM_NAME || "",
+          email: process.env.FROM_EMAIL || '',
+          name: process.env.FROM_NAME || '',
         },
       };
 
@@ -67,13 +62,13 @@ app.post("/send-mail", checkApiKey, jsonParser, (req, res) => {
         })
         .catch((error) => {
           console.log(error);
-          const message = "Failed to send email";
+          const message = 'Failed to send email';
           logger.error({ message, error });
           res.status(500).send(message);
         });
     })
     .catch((error) => {
-      const message = "Failed to read HTML template";
+      const message = 'Failed to read HTML template';
       logger.error({ message, error });
       res.status(500).send(message);
     });

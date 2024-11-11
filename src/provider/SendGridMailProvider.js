@@ -1,12 +1,13 @@
-import sgMail from "@sendgrid/mail";
-import { logger } from "../utils/logger.ts";
+import logger from "../utils/logger";
 
-export class SendGridMailProvider implements MailProvider {
+const sgMail = require("@sendgrid/mail");
+
+module.exports = class SendGridMailProvider {
   constructor() {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || "");
   }
 
-  public sendMail(payload: SendMailFnPayload) {
+  sendMail(payload) {
     return sgMail.send(payload).then(
       () => {
         const message = "SendGrid: Email sent successfully";
@@ -18,7 +19,7 @@ export class SendGridMailProvider implements MailProvider {
           throw { ...error };
         }
         throw { error };
-      }
+      },
     );
   }
-}
+};
