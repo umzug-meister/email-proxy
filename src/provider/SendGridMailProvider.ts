@@ -1,12 +1,14 @@
-const sgMail = require('@sendgrid/mail');
-const logger = require('../utils/logger');
+import { Email, MailProvider } from '../types';
+import { logger } from '../utils/logger';
 
-export class SendGridMailProvider {
+import sgMail from '@sendgrid/mail';
+
+export class SendGridMailProvider implements MailProvider {
   constructor() {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
   }
 
-  sendMail(email: any) {
+  sendMail(email: Email) {
     return sgMail.send(email).then(
       () => {
         const message = 'SendGrid: Email sent successfully';

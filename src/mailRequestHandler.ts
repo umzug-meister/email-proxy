@@ -1,7 +1,8 @@
+import { Email, MailProvider } from './types';
 import { readHtmlTemplate, replaceTemplateVariables } from './utils/html-template';
 import { logger } from './utils/logger';
 
-async function handleEmailRequest(res: any, mailProvider: any, email: any) {
+async function handleEmailRequest(res: any, mailProvider: MailProvider, email: Email) {
   mailProvider
     .sendMail(email)
     .then((message: string) => {
@@ -14,7 +15,7 @@ async function handleEmailRequest(res: any, mailProvider: any, email: any) {
     });
 }
 
-export async function handleOfferEmailRequest(req: any, res: any, mailProvider: any) {
+export async function handleOfferEmailRequest(req: any, res: any, mailProvider: MailProvider) {
   const { to, subject, variables, attachment } = req.body;
 
   if (!to || !subject || !variables || !attachment) {
@@ -33,14 +34,14 @@ export async function handleOfferEmailRequest(req: any, res: any, mailProvider: 
         to,
         subject,
         html,
-        bcc: process.env.FROM_EMAIL,
+        bcc: process.env.FROM_EMAIL || '',
         replyTo: {
-          email: process.env.REPLY_TO_EMAIL,
-          name: process.env.REPLY_TO_NAME,
+          email: process.env.REPLY_TO_EMAIL || '',
+          name: process.env.REPLY_TO_NAME || '',
         },
         from: {
-          email: process.env.FROM_EMAIL,
-          name: process.env.FROM_NAME,
+          email: process.env.FROM_EMAIL || '',
+          name: process.env.FROM_NAME || '',
         },
         attachments: [
           {

@@ -21,6 +21,9 @@
     "prettier": "^3.3.3",
     "winston": "^3.16.0"
   },
+  "engines": {
+    "node": "22"
+  },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.1",
     "@types/cors": "^2.8.17",
