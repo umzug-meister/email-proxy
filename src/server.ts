@@ -1,16 +1,16 @@
-// @ts-check
-const cors = require("cors");
-const express = require("express");
-const rateLimit = require("express-rate-limit");
-const logger = require("./utils/logger");
-const checkApiKey = require("./middleware/checkApiKey");
-const jsonParser = require("./middleware/jsonParser");
-
-const SendGridMailProvider = require("./provider/SendGridMailProvider");
-const { handleOfferEmailRequest } = require("./mailRequestHandler");
+import rateLimit from "express-rate-limit";
+import { checkApiKey } from "./middleware/checkApiKey";
+import { jsonParser } from "./middleware/jsonParser";
+import cors from "cors";
+import { logger } from "./utils/logger";
+import express from "express";
+import "dotenv/config";
+import { SendGridMailProvider } from "./provider/SendGridMailProvider";
+import { handleOfferEmailRequest } from "./mailRequestHandler";
 
 const app = express();
 const startTime = new Date().toISOString();
+
 const mailProvider = new SendGridMailProvider();
 
 const nodeEnv = process.env.NODE_ENV;

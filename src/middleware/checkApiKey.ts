@@ -1,6 +1,6 @@
-const logger = require("../utils/logger.js");
+import { logger } from "../utils/logger";
 
-function checkApiKey(req, res, next) {
+export function checkApiKey(req: any, res: any, next: any) {
   const apiKey = req.headers["x-api-key"];
 
   if (!apiKey) {
@@ -15,5 +15,3 @@ function checkApiKey(req, res, next) {
     return res.status(403).send("Access denied: Invalid API key");
   }
 }
-
-module.exports = checkApiKey;

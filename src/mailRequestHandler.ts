@@ -1,37 +1,28 @@
-// @ts-check
-const SendGridMailProvider = require("./provider/SendGridMailProvider");
-const {
+import {
   readHtmlTemplate,
   replaceTemplateVariables,
-} = require("./utils/html-template");
-const logger = require("./utils/logger");
+} from "./utils/html-template";
 
-/**
- *
- * @param {*} res
- * @param {*} mailProvider
- * @param {import("./provider/SendGridMailProvider").SendMailPayload} email
- */
-async function handleEmailRequest(res, mailProvider, email) {
+import { logger } from "./utils/logger";
+
+async function handleEmailRequest(res: any, mailProvider: any, email: any) {
   mailProvider
     .sendMail(email)
-    .then((message) => {
+    .then((message: string) => {
       res.status(200).send(message);
     })
-    .catch((error) => {
+    .catch((error: any) => {
       const message = "Failed to send email";
       logger.error({ message, error });
       res.status(500).send(message);
     });
 }
 
-/**
- *
- * @param {*} req
- * @param {*} res
- * @param {SendGridMailProvider} mailProvider
- */
-async function handleOfferEmailRequest(req, res, mailProvider) {
+export async function handleOfferEmailRequest(
+  req: any,
+  res: any,
+  mailProvider: any
+) {
   const { to, subject, variables, attachment } = req.body;
 
   if (!to || !subject || !variables || !attachment) {
@@ -44,7 +35,7 @@ async function handleOfferEmailRequest(req, res, mailProvider) {
 
   readHtmlTemplate("email")
     .then((template) => {
-      const html = replaceTemplateVariables(template, variables);
+      const html = replaceTemplateVariables(template as string, variables);
 
       handleEmailRequest(res, mailProvider, {
         to,
@@ -75,5 +66,3 @@ async function handleOfferEmailRequest(req, res, mailProvider) {
       res.status(500).send(message);
     });
 }
-
-module.exports = { handleOfferEmailRequest };
