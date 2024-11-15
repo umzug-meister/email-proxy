@@ -1,9 +1,5 @@
-import {
-  readHtmlTemplate,
-  replaceTemplateVariables,
-} from "./utils/html-template";
-
-import { logger } from "./utils/logger";
+import { readHtmlTemplate, replaceTemplateVariables } from './utils/html-template';
+import { logger } from './utils/logger';
 
 async function handleEmailRequest(res: any, mailProvider: any, email: any) {
   mailProvider
@@ -12,17 +8,13 @@ async function handleEmailRequest(res: any, mailProvider: any, email: any) {
       res.status(200).send(message);
     })
     .catch((error: any) => {
-      const message = "Failed to send email";
+      const message = 'Failed to send email';
       logger.error({ message, error });
       res.status(500).send(message);
     });
 }
 
-export async function handleOfferEmailRequest(
-  req: any,
-  res: any,
-  mailProvider: any
-) {
+export async function handleOfferEmailRequest(req: any, res: any, mailProvider: any) {
   const { to, subject, variables, attachment } = req.body;
 
   if (!to || !subject || !variables || !attachment) {
@@ -33,7 +25,7 @@ export async function handleOfferEmailRequest(
     return res.status(400).send(message);
   }
 
-  readHtmlTemplate("email")
+  readHtmlTemplate('email')
     .then((template) => {
       const html = replaceTemplateVariables(template as string, variables);
 
@@ -54,14 +46,14 @@ export async function handleOfferEmailRequest(
           {
             content: attachment.content,
             filename: attachment.filename,
-            disposition: "attachment",
-            type: "application/pdf",
+            disposition: 'attachment',
+            type: 'application/pdf',
           },
         ],
       });
     })
     .catch((error) => {
-      const message = "Failed to read HTML template";
+      const message = 'Failed to read HTML template';
       logger.error({ message, error });
       res.status(500).send(message);
     });

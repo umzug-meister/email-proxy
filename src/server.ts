@@ -1,12 +1,13 @@
-import rateLimit from "express-rate-limit";
-import { checkApiKey } from "./middleware/checkApiKey";
-import { jsonParser } from "./middleware/jsonParser";
-import cors from "cors";
-import { logger } from "./utils/logger";
-import express from "express";
-import "dotenv/config";
-import { SendGridMailProvider } from "./provider/SendGridMailProvider";
-import { handleOfferEmailRequest } from "./mailRequestHandler";
+import { handleOfferEmailRequest } from './mailRequestHandler';
+import { checkApiKey } from './middleware/checkApiKey';
+import { jsonParser } from './middleware/jsonParser';
+import { SendGridMailProvider } from './provider/SendGridMailProvider';
+import { logger } from './utils/logger';
+
+import cors from 'cors';
+import 'dotenv/config';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const startTime = new Date().toISOString();
@@ -21,7 +22,7 @@ const limiter = rateLimit({
 });
 
 const corsOptions =
-  nodeEnv === "production"
+  nodeEnv === 'production'
     ? {
         origin: process.env.CORS_ALLOWED_ORIGIN,
         optionsSuccessStatus: 200,
@@ -30,24 +31,24 @@ const corsOptions =
 
 app.use(cors(corsOptions));
 app.use(limiter);
-app.set("view engine", "ejs");
-app.set("views", "./src/views");
-app.use(express.json({ limit: "50mb" }));
+app.set('view engine', 'ejs');
+app.set('views', './src/views');
+app.use(express.json({ limit: '50mb' }));
 
-app.get("/", (_, res) => {
-  res.render("index", { nodeEnv, startTime });
+app.get('/', (_, res) => {
+  res.render('index', { nodeEnv, startTime });
 });
 
-app.post("/send-mail", checkApiKey, jsonParser, (req, res) => {
+app.post('/send-mail', checkApiKey, jsonParser, (req, res) => {
   const { type } = req.body;
 
   switch (type) {
-    case "offer":
+    case 'offer':
       handleOfferEmailRequest(req, res, mailProvider);
       break;
-    case "invoice":
+    case 'invoice':
       return;
-    case "refusal":
+    case 'refusal':
       return;
     default:
       res.status(400).send(`Invalid type: ${type}`);
