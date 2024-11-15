@@ -1,11 +1,11 @@
-const path = require('path');
+import { logger } from './logger';
 
-const fs = require('fs');
-const logger = require('./logger.js');
+import fs from 'fs';
+import path from 'path';
 
 const FOLDER = '../templates';
 
-async function readHtmlTemplate(templateFileName) {
+export async function readHtmlTemplate(templateFileName: string) {
   const templatePath = path.join(__dirname, FOLDER, `${templateFileName}.html`);
 
   logger.info({ message: `Reading template file: ${templatePath}` });
@@ -22,7 +22,7 @@ async function readHtmlTemplate(templateFileName) {
   });
 }
 
-function replaceTemplateVariables(template, variables) {
+export function replaceTemplateVariables(template: string, variables: any) {
   let result = template;
   for (const key in variables) {
     const regex = new RegExp(`{{${key}}}`, 'g');
@@ -30,8 +30,3 @@ function replaceTemplateVariables(template, variables) {
   }
   return result;
 }
-
-module.exports = {
-  replaceTemplateVariables,
-  readHtmlTemplate,
-};
