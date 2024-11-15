@@ -9,7 +9,7 @@ export function checkApiKey(req: any, res: any, next: any) {
   }
 
   if (apiKey === process.env.API_KEY) {
-    next(); // API key is valid, proceed to the next middleware or route handler
+    next();
   } else {
     logger.error({ error: 'Invalid API key' });
     return res.status(403).send('Access denied: Invalid API key');
