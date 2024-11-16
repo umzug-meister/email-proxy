@@ -73,9 +73,3 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   logger.info(`Server running in ${NODE_ENV} mode on port: ${PORT}`);
 });
-
-function asyncHandler(fn: express.RequestHandler): express.RequestHandler {
-  return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-}
