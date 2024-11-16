@@ -23,7 +23,10 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
     const isRejection = type === 'rejection';
     logMailSending({ to, subject });
 
-    const html = await generateHtmlEmail(!isRejection, variables);
+    const html = await generateHtmlEmail({
+      includeAdvertisement: type === 'offer' || type === 'invoice',
+      variables,
+    });
 
     const emailOptions: Email = prepareEmailOptions({
       to,

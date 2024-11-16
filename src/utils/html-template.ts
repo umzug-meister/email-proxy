@@ -8,7 +8,13 @@ const FOLDER = '../templates';
 type Variables = {
   [key: string]: string;
 };
-export async function generateHtmlEmail(includeAdvertisement: boolean, variables: Variables) {
+export async function generateHtmlEmail({
+  includeAdvertisement,
+  variables,
+}: {
+  includeAdvertisement: boolean;
+  variables: Variables;
+}) {
   const emailTemplate = await readHtmlTemplate('email');
   let advertisement = '';
   if (includeAdvertisement) {
