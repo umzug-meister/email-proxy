@@ -8,9 +8,9 @@ import { Request, Response } from 'express';
 interface EmailRequest {
   to: string;
   subject: string;
-  variables: Record<string, any>;
+  variables: Record<string, string>;
   attachment?: { content: string; filename: string };
-  type: string;
+  type: 'refusal' | 'invoice' | 'offer';
 }
 
 export async function handleRequest(req: Request, res: Response, mailProvider: MailProvider) {
@@ -42,7 +42,13 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
   }
 }
 
-function validateRequestBody({ to, subject, variables, attachment, type }: Partial<EmailRequest>): void {
+function validateRequestBody({
+  to,
+  subject,
+  variables,
+  attachment,
+  type,
+}: Partial<EmailRequest>): void {
   if (!to || !subject || !variables) {
     throw new Error('Missing "to", "subject", or "variables" in request body');
   }
@@ -53,7 +59,7 @@ function validateRequestBody({ to, subject, variables, attachment, type }: Parti
 
 function logMailSending({ subject, to }: { subject: string; to: string }) {
   logger.info({
-    message: `Sending email with subject "${subject}" to "${to.split('@')[0]}"`,
+    message: `Sending email with subject "${subject}" to "${to}"`,
   });
 }
 

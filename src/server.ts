@@ -2,7 +2,6 @@ import { handleRequest } from './mailRequestHandler';
 import { checkApiKey } from './middleware/checkApiKey';
 import { jsonParser } from './middleware/jsonParser';
 import { SendGridMailProvider } from './provider/SendGridMailProvider';
-import { SendOfferEmailRequest } from './types';
 import { logger } from './utils/logger';
 
 import cors from 'cors';
@@ -11,40 +10,72 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 
 const app = express();
-const startTime = new Date().toISOString();
 
+// Configuration
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const CORS_ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || '*';
+const REQUEST_LIMIT = parseInt(process.env.REQUEST_LIMIT || '10', 10);
+const REQUEST_WINDOW = parseInt(process.env.REQUEST_WINDOW || '15', 10) * 60 * 1000;
+const JSON_LIMIT = process.env.JSON_LIMIT || '50mb';
+
+if (!process.env.CORS_ALLOWED_ORIGIN && NODE_ENV === 'production') {
+  logger.warn('CORS_ALLOWED_ORIGIN is not set for production. Defaulting to "*".');
+}
+
+// Middleware
+app
+  .use(
+    cors({
+      origin: NODE_ENV === 'production' ? CORS_ALLOWED_ORIGIN : '*',
+      optionsSuccessStatus: 200,
+    }),
+  )
+  .use(
+    rateLimit({
+      windowMs: REQUEST_WINDOW, // 15 minutes
+      max: REQUEST_LIMIT, // Limit each IP
+      message: 'Too many requests from this IP. Please try again later.',
+      handler: (req, res) => {
+        logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+        res.status(429).send('Too many requests. Please try again later.');
+      },
+    }),
+  );
+
+app.use(express.json({ limit: JSON_LIMIT }));
+
+// Email Provider
 const mailProvider = new SendGridMailProvider();
 
-const nodeEnv = process.env.NODE_ENV;
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // limit each IP to 100 requests per windowMs
-});
-
-const corsOptions =
-  nodeEnv === 'production'
-    ? {
-        origin: process.env.CORS_ALLOWED_ORIGIN,
-        optionsSuccessStatus: 200,
-      }
-    : {};
-
-app.use(cors(corsOptions));
-app.use(limiter);
+// Views
 app.set('view engine', 'ejs');
 app.set('views', './src/views');
-app.use(express.json({ limit: '50mb' }));
 
+// Routes
 app.get('/', (_, res) => {
-  res.render('index', { nodeEnv, startTime });
+  res.render('index', { nodeEnv: NODE_ENV, startTime: new Date().toISOString() });
 });
 
-app.post('/send-mail', checkApiKey, jsonParser, (req: express.Request<any, any, SendOfferEmailRequest>, res) => {
-  handleRequest(req, res, mailProvider);
+// prettier-ignore
+app.post('/send-mail',
+  checkApiKey,
+  jsonParser,
+  (req, res) => handleRequest(req, res, mailProvider),
+);
+
+// Fallback Route
+app.use((req, res) => {
+  logger.warn(`Unhandled route: ${req.method} ${req.url}`);
+  res.status(404).send('Route not found');
 });
 
-const port = process.env.PORT;
+app.listen(PORT, () => {
+  logger.info(`Server running in ${NODE_ENV} mode on port: ${PORT}`);
+});
 
-logger.info(`Server is running on port: ${port}`);
-app.listen(port);
+function asyncHandler(fn: express.RequestHandler): express.RequestHandler {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+}
