@@ -5,75 +5,99 @@ import { logger } from './utils/logger';
 
 import { Request, Response } from 'express';
 
-export async function handleRequest(req: Request, res: Response, mailProvider: MailProvider) {
-  const { to, subject, variables, attachment, type } = req.body;
+interface EmailRequest {
+  to: string;
+  subject: string;
+  variables: Record<string, any>;
+  attachment?: { content: string; filename: string };
+  type: string;
+}
 
-  if (!to || !subject || !variables) {
-    const message = 'Missing "to", "subject", or "variables" in request body';
-    logger.error({
-      message,
+export async function handleRequest(req: Request, res: Response, mailProvider: MailProvider) {
+  try {
+    const { to, subject, variables, attachment, type }: EmailRequest = req.body;
+
+    // Validate request body
+    validateRequestBody({ to, subject, variables, attachment, type });
+
+    const isRefusal = type === 'refusal';
+    logMailSending({ to, subject });
+
+    const html = await generateHtmlEmail(!isRefusal, variables);
+
+    const emailOptions: Email = prepareEmailOptions({
+      to,
+      subject,
+      html,
+      isRefusal,
+      attachment,
     });
-    return res.status(400).send(message);
+
+    const result = await mailProvider.sendMail(emailOptions);
+
+    logger.info({ message: `Email sent successfully to ${to}` });
+    res.status(200).send(result);
+  } catch (error: any) {
+    handleError(error, res);
+  }
+}
+
+function validateRequestBody({ to, subject, variables, attachment, type }: Partial<EmailRequest>): void {
+  if (!to || !subject || !variables) {
+    throw new Error('Missing "to", "subject", or "variables" in request body');
   }
   if (type !== 'refusal' && !attachment) {
-    const message = 'Missing "attachment" in request body';
-    logger.error({
-      message,
-    });
-    return res.status(400).send(message);
+    throw new Error('Missing "attachment" in request body for non-refusal types');
   }
-
-  const isRefusal = type === 'refusal';
-  logMailSending({ to, subject });
-  generateHtmlEmail(!isRefusal, variables)
-    .then((html) => {
-      sendMail(res, mailProvider, {
-        to,
-        subject,
-        html,
-        bcc: process.env.FROM_EMAIL || '',
-        replyTo: {
-          email: process.env.REPLY_TO_EMAIL || '',
-          name: process.env.REPLY_TO_NAME || '',
-        },
-        from: {
-          email: process.env.FROM_EMAIL || '',
-          name: process.env.FROM_NAME || '',
-        },
-        attachments: isRefusal
-          ? []
-          : [
-              {
-                content: attachment.content,
-                filename: attachment.filename,
-                disposition: 'attachment',
-                type: 'application/pdf',
-              },
-            ],
-      });
-    })
-    .catch((error) => {
-      const message = 'Failed to read HTML template';
-      logger.error({ message, error });
-      res.status(500).send(message);
-    });
 }
 
 function logMailSending({ subject, to }: { subject: string; to: string }) {
   logger.info({
-    message: `Sending email with subject ${subject} to ${to.split('@')[0]}`,
+    message: `Sending email with subject "${subject}" to "${to.split('@')[0]}"`,
   });
 }
 
-function sendMail(res: Response, mailProvider: MailProvider, email: Email) {
-  mailProvider
-    .sendMail(email)
-    .then((message: string) => {
-      res.status(200).send(message);
-    })
-    .catch((error: any) => {
-      const message = 'Failed to send email';
-      logger.error({ message, error });
-      res.status(500).send(message);
-    });
+function prepareEmailOptions({
+  to,
+  subject,
+  html,
+  isRefusal,
+  attachment,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  isRefusal: boolean;
+  attachment?: { content: string; filename: string };
+}): Email {
+  return {
+    to,
+    subject,
+    html,
+    bcc: process.env.FROM_EMAIL || '',
+    replyTo: {
+      email: process.env.REPLY_TO_EMAIL || '',
+      name: process.env.REPLY_TO_NAME || '',
+    },
+    from: {
+      email: process.env.FROM_EMAIL || '',
+      name: process.env.FROM_NAME || '',
+    },
+    attachments: isRefusal
+      ? []
+      : [
+          {
+            content: attachment?.content || '',
+            filename: attachment?.filename || '',
+            disposition: 'attachment',
+            type: 'application/pdf',
+          },
+        ],
+  };
+}
+
+function handleError(error: Error, res: Response): void {
+  logger.error({ message: error.message, stack: error.stack });
+  const statusCode = error.message.includes('Missing') ? 400 : 500;
+  res.status(statusCode).send(error.message);
 }
