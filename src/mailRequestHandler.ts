@@ -10,7 +10,7 @@ interface EmailRequest {
   subject: string;
   variables: Record<string, string>;
   attachment?: { content: string; filename: string };
-  type: 'refusal' | 'invoice' | 'offer';
+  type: 'rejection' | 'invoice' | 'offer';
 }
 
 export async function handleRequest(req: Request, res: Response, mailProvider: MailProvider) {
@@ -20,16 +20,16 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
     // Validate request body
     validateRequestBody({ to, subject, variables, attachment, type });
 
-    const isRefusal = type === 'refusal';
+    const isRejection = type === 'rejection';
     logMailSending({ to, subject });
 
-    const html = await generateHtmlEmail(!isRefusal, variables);
+    const html = await generateHtmlEmail(!isRejection, variables);
 
     const emailOptions: Email = prepareEmailOptions({
       to,
       subject,
       html,
-      isRefusal,
+      isRejection,
       attachment,
     });
 
@@ -50,7 +50,7 @@ function validateRequestBody({
   if (!to || !subject || !variables) {
     throw new Error('Missing "to", "subject", or "variables" in request body');
   }
-  if (type !== 'refusal' && !attachment) {
+  if (type !== 'rejection' && !attachment) {
     throw new Error('Missing "attachment" in request body for non-refusal types');
   }
 }
@@ -65,13 +65,13 @@ function prepareEmailOptions({
   to,
   subject,
   html,
-  isRefusal,
+  isRejection,
   attachment,
 }: {
   to: string;
   subject: string;
   html: string;
-  isRefusal: boolean;
+  isRejection: boolean;
   attachment?: { content: string; filename: string };
 }): Email {
   return {
@@ -87,7 +87,7 @@ function prepareEmailOptions({
       email: process.env.FROM_EMAIL || '',
       name: process.env.FROM_NAME || '',
     },
-    attachments: isRefusal
+    attachments: isRejection
       ? []
       : [
           {
