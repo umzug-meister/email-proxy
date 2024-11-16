@@ -54,7 +54,7 @@ app.set('views', './src/views');
 
 // Routes
 app.get('/', (_, res) => {
-  res.render('index', { nodeEnv: NODE_ENV, startTime: new Date().toISOString() });
+  res.render('index', { nodeEnv: NODE_ENV, startTime: new Date().toString() });
 });
 
 // prettier-ignore
