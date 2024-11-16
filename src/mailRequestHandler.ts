@@ -34,8 +34,6 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
     });
 
     const result = await mailProvider.sendMail(emailOptions);
-
-    logger.info({ message: `Email sent successfully to ${to}` });
     res.status(200).send(result);
   } catch (error: any) {
     handleError(error, res);
