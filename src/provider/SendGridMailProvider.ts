@@ -1,5 +1,6 @@
-import { Email, MailProvider } from '../types';
+import { Email } from '../types';
 import { logger } from '../utils/logger';
+import { MailProvider } from './MailProvider';
 
 import sgMail from '@sendgrid/mail';
 

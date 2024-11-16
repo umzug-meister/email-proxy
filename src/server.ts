@@ -1,7 +1,8 @@
-import { handleOfferEmailRequest } from './mailRequestHandler';
+import { handleRequest } from './mailRequestHandler';
 import { checkApiKey } from './middleware/checkApiKey';
 import { jsonParser } from './middleware/jsonParser';
 import { SendGridMailProvider } from './provider/SendGridMailProvider';
+import { SendOfferEmailRequest } from './types';
 import { logger } from './utils/logger';
 
 import cors from 'cors';
@@ -39,20 +40,8 @@ app.get('/', (_, res) => {
   res.render('index', { nodeEnv, startTime });
 });
 
-app.post('/send-mail', checkApiKey, jsonParser, (req, res) => {
-  const { type } = req.body;
-
-  switch (type) {
-    case 'offer':
-      handleOfferEmailRequest(req, res, mailProvider);
-      break;
-    case 'invoice':
-      return;
-    case 'refusal':
-      return;
-    default:
-      res.status(400).send(`Invalid type: ${type}`);
-  }
+app.post('/send-mail', checkApiKey, jsonParser, (req: express.Request<any, any, SendOfferEmailRequest>, res) => {
+  handleRequest(req, res, mailProvider);
 });
 
 const port = process.env.PORT;

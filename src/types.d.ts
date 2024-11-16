@@ -1,4 +1,4 @@
-export interface Email {
+export type Email = {
   to: string;
   subject: string;
   html: string;
@@ -6,20 +6,29 @@ export interface Email {
   replyTo: EmailData;
   from: EmailData;
   attachments: Attachment[];
-}
+};
 
-export interface MailProvider {
-  sendMail: (email: Email) => Promise<string>;
-}
-
-interface Attachment {
+type Attachment = {
   filename: string;
   content: string;
   disposition: 'attachment';
   type: 'application/pdf';
-}
+};
 
-interface EmailData {
+type EmailData = {
   email: string;
   name: string;
-}
+};
+
+type SendOfferEmailRequest = {
+  type: 'offer' | 'invoice' | 'refusal';
+  to: string;
+  subject: string;
+  variables: {
+    [key: string]: string;
+  };
+  attachment: {
+    filename: string;
+    content: string;
+  };
+};
