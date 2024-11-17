@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node build/server.js",
-    "dev": "npx nodemon -r dotenv/config",
+    "dev": "npx nodemon",
     "build": "rimraf ./build && tsc && npm run copy-templates",
     "copy-templates": "copyfiles -u 1 src/**/*.html build/",
     "prettier": "prettier . --write"

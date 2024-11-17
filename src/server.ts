@@ -25,6 +25,7 @@ if (!process.env.CORS_ALLOWED_ORIGIN && NODE_ENV === 'production') {
 
 // Middleware
 app
+  .use(express.static('public'))
   .use(
     cors({
       origin: NODE_ENV === 'production' ? CORS_ALLOWED_ORIGIN : '*',
