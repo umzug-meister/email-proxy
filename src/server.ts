@@ -5,15 +5,20 @@ import { SendGridMailProvider } from './provider/SendGridMailProvider';
 import { logger } from './utils/logger';
 
 import cors from 'cors';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
 const app = express();
 
 // Configuration
-const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+if (NODE_ENV === 'development') {
+  dotenv.config();
+  console.log('Loaded .env file');
+}
+
+const PORT = process.env.PORT || 3000;
 const CORS_ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || '*';
 const REQUEST_LIMIT = parseInt(process.env.REQUEST_LIMIT || '10', 10);
 const REQUEST_WINDOW = parseInt(process.env.REQUEST_WINDOW || '15', 10) * 60 * 1000;
