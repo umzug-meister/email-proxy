@@ -5,6 +5,7 @@ import { SendGridMailProvider } from './provider/SendGridMailProvider';
 import { logger } from './utils/logger';
 
 import cors from 'cors';
+import 'dotenv/config';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
@@ -12,7 +13,6 @@ const app = express();
 
 // Configuration
 const NODE_ENV = process.env.NODE_ENV || 'development';
-
 const PORT = process.env.PORT || 3000;
 const CORS_ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || '*';
 const REQUEST_LIMIT = parseInt(process.env.REQUEST_LIMIT || '10', 10);
@@ -55,7 +55,11 @@ app.set('views', './src/views');
 
 // Routes
 app.get('/', (_, res) => {
-  res.render('index', { nodeEnv: NODE_ENV, startTime: new Date().toString() });
+  res.render('index', {
+    nodeEnv: NODE_ENV,
+    startTime: new Date().toString(),
+    tenant: process.env.FROM_NAME,
+  });
 });
 
 // prettier-ignore
