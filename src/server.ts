@@ -33,6 +33,7 @@ app
   )
   .use(
     rateLimit({
+      validate: { xForwardedForHeader: false },
       windowMs: REQUEST_WINDOW, // 15 minutes
       max: REQUEST_LIMIT, // Limit each IP
       message: 'Too many requests from this IP. Please try again later.',
