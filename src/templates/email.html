@@ -6,37 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Umzug Ruck Zuck</title>
     <style>
-      html,
       body {
         margin: 0;
         padding: 0;
         font-family: 'Verdana', sans-serif;
-        color: #303030;
+        color: #000000;
       }
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: #eff2f3;
+      p {
+        margin-block-start: 0.6rem;
+        margin-block-end: 0.6rem;
       }
-      .image {
+
+      .image-container {
         text-align: center;
         padding: 10px;
         background: #1877ba;
       }
+      .image {
+        height: 180px;
+        width: auto;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #ededed;
+      }
+      .content,
+      .footer {
+        padding: 0.8rem;
+      }
+
       .content {
-        font-size: 16px;
-        padding: 10px;
+        font-size: 1rem;
       }
       .footer {
-        padding: 10px;
         color: #a8a8a8;
-        background-color: #303030;
-        font-size: 12px;
+        background-color: #363636;
+        font-size: 0.8rem;
         text-align: center;
       }
-      .greetings {
-        font-family: 'Verdana', sans-serif;
+      .footer a {
+        color: #a8a8a8;
       }
+      .footer a:hover {
+        color: #ffffff;
+      }
+
       /* quill */
       .ql-align-right {
         text-align: right;
@@ -45,9 +60,9 @@
   </head>
   <body>
     <div class="container">
-      <div class="image">
+      <div class="image-container">
         <img
-          style="margin: auto; max-width: 80%; height: auto"
+          class="image"
           alt="Umzug Ruck Zuck"
           src="https://umzugruckzuck.de/wp-content/uploads/2023/09/umzug-ruck-zuck-muenchen-logo-sicher-schnell-kompetent-650.jpg.png"
         />
@@ -59,12 +74,12 @@
           Freundliche Grüße, <br />
           Ihr Umzug Ruck Zuck Team.
         </p>
-        {{advertisement}}
       </div>
+      {{advertisement}}
       <div class="footer">
         <p>Mobil: 0176 101 719 90</p>
         <p>Telefon: 089 306 429 72</p>
-        <p><a href="https://umzugruckzuck.de">Umzug Ruck Zuck</a></p>
+        <p><a href="https://umzugruckzuck.de">umzugruckzuck.de</a></p>
         <p>© 2024 Umzug Ruck Zuck. Alle Rechte vorbehalten.</p>
       </div>
     </div>
