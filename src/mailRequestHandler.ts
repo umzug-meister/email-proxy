@@ -24,7 +24,7 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
     logMailSending({ to, subject });
 
     const html = await generateHtmlEmail({
-      includeAdvertisement: type === 'offer' || type === 'invoice',
+      includeAdvertisement: type === 'offer',
       variables,
     });
 
