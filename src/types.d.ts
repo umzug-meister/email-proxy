@@ -1,14 +1,16 @@
-export type Email = {
+import { Request } from 'express';
+
+export type AppEmail = {
   to: string;
   subject: string;
   html: string;
   bcc: string;
   replyTo: EmailData;
   from: EmailData;
-  attachments: Attachment[];
+  attachments: AppAttachment[];
 };
 
-type Attachment = {
+type SgAttachment = {
   filename: string;
   content: string;
   disposition: 'attachment';
@@ -20,15 +22,19 @@ type EmailData = {
   name: string;
 };
 
-type SendOfferEmailRequest = {
-  type: 'offer' | 'invoice' | 'refusal';
+type AppRequest = Request<{}, {}, SendEmailRequest>;
+
+type AppAttachment = {
+  filename: string;
+  content: string;
+};
+
+export type SendEmailRequest = {
+  type: 'offer' | 'invoice' | 'rejection';
   to: string;
   subject: string;
   variables: {
     [key: string]: string;
   };
-  attachment: {
-    filename: string;
-    content: string;
-  };
+  attachments: AppAttachment[];
 };

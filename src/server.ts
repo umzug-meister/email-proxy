@@ -2,11 +2,12 @@ import { handleRequest } from './mailRequestHandler';
 import { checkApiKey } from './middleware/checkApiKey';
 import { jsonParser } from './middleware/jsonParser';
 import { SendGridMailProvider } from './provider/SendGridMailProvider';
+import { SendEmailRequest } from './types';
 import { logger } from './utils/logger';
 
 import cors from 'cors';
 import 'dotenv/config';
-import express from 'express';
+import express, { Request } from 'express';
 import rateLimit from 'express-rate-limit';
 
 const appStartTime = new Date().toString();
@@ -68,7 +69,7 @@ app.get('/', (_, res) => {
 app.post('/send-mail',
   checkApiKey,
   jsonParser,
-  (req, res) => handleRequest(req, res, mailProvider),
+  (req: Request<{}, {}, SendEmailRequest>, res) => handleRequest(req, res, mailProvider),
 );
 
 // Fallback Route
