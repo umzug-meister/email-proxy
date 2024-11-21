@@ -9,6 +9,7 @@ import 'dotenv/config';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
+const appStartTime = new Date().toString();
 const app = express();
 
 // Configuration
@@ -58,7 +59,7 @@ app.set('views', './src/views');
 app.get('/', (_, res) => {
   res.render('index', {
     nodeEnv: NODE_ENV,
-    startTime: new Date().toString(),
+    startTime: appStartTime,
     tenant: process.env.FROM_NAME,
   });
 });
