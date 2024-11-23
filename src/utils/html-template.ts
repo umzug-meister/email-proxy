@@ -31,8 +31,6 @@ export async function generateHtmlEmail({
 async function readHtmlTemplate(templateFileName: string): Promise<string> {
   const templatePath = path.join(__dirname, FOLDER, `${templateFileName}.html`);
 
-  logger.info({ message: `Reading template file: ${templatePath}` });
-
   return new Promise((resolve, reject) => {
     return fs.readFile(templatePath, 'utf8', (err, data) => {
       if (err) {
