@@ -1,5 +1,6 @@
 import { logger } from './logger';
 
+import { inline } from '@css-inline/css-inline';
 import fs from 'fs';
 import path from 'path';
 
@@ -20,7 +21,11 @@ export async function generateHtmlEmail({
   if (includeAdvertisement) {
     advertisement = await readHtmlTemplate('advertisement');
   }
-  return replaceTemplateVariables(emailTemplate, { advertisement, ...variables });
+
+  const html = replaceTemplateVariables(emailTemplate, { advertisement, ...variables });
+
+  // optimize for email clients
+  return inline(html, { keepStyleTags: true });
 }
 
 async function readHtmlTemplate(templateFileName: string): Promise<string> {
