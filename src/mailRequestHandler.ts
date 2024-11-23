@@ -84,6 +84,13 @@ function enreachEmail({
 
 function handleError(error: Error, res: Response): void {
   logger.error({ message: error.message, stack: error.stack });
-  const statusCode = error.message.includes('Missing') ? 400 : 500;
+
+  const errorMessage = error.message;
+  let statusCode = 500;
+
+  if (typeof error.message === 'string' && error.message.includes('Missing')) {
+    statusCode = 400;
+  }
+
   res.status(statusCode).send(error.message);
 }
