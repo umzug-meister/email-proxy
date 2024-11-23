@@ -1,5 +1,5 @@
-import { Email } from '../types';
+import { AppEmail } from '../types';
 
 export interface MailProvider {
-  sendMail: (email: Email) => Promise<string>;
+  sendMail: (email: AppEmail) => Promise<string>;
 }

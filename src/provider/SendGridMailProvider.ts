@@ -1,8 +1,8 @@
-import { Email } from '../types';
+import { AppEmail } from '../types';
 import { logger } from '../utils/logger';
 import { MailProvider } from './MailProvider';
 
-import sgMail from '@sendgrid/mail';
+import sgMail, { MailDataRequired } from '@sendgrid/mail';
 
 export class SendGridMailProvider implements MailProvider {
   constructor() {
@@ -15,9 +15,9 @@ export class SendGridMailProvider implements MailProvider {
     }
   }
 
-  async sendMail(email: Email): Promise<string> {
+  async sendMail(email: AppEmail): Promise<string> {
     try {
-      await sgMail.send(email);
+      await sgMail.send(this.convertToProviderMail(email));
 
       const logMessage = `SendGrid: Email sent successfully`;
       logger.info({
@@ -33,5 +33,22 @@ export class SendGridMailProvider implements MailProvider {
       }
       throw { error };
     }
+  }
+
+  private convertToProviderMail(email: AppEmail): MailDataRequired {
+    return {
+      to: email.to,
+      from: email.from,
+      bcc: email.bcc,
+      replyTo: email.replyTo,
+      subject: email.subject,
+      html: email.html,
+      attachments: email.attachments.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        disposition: 'attachment',
+        type: 'application/pdf',
+      })),
+    };
   }
 }

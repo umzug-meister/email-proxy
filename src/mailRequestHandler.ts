@@ -1,26 +1,17 @@
 import { MailProvider } from './provider/MailProvider';
-import { Email } from './types';
+import { AppAttachment, AppEmail, AppRequest, SendEmailRequest } from './types';
 import { generateHtmlEmail } from './utils/html-template';
 import { logger } from './utils/logger';
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
-interface EmailRequest {
-  to: string;
-  subject: string;
-  variables: Record<string, string>;
-  attachment?: { content: string; filename: string };
-  type: 'rejection' | 'invoice' | 'offer';
-}
-
-export async function handleRequest(req: Request, res: Response, mailProvider: MailProvider) {
+export async function handleRequest(req: AppRequest, res: Response, mailProvider: MailProvider) {
   try {
-    const { to, subject, variables, attachment, type }: EmailRequest = req.body;
+    const { to, subject, variables, attachments, type } = req.body;
 
     // Validate request body
-    validateRequestBody({ to, subject, variables, attachment, type });
+    validateRequestBody(req.body);
 
-    const isRejection = type === 'rejection';
     logMailSending({ to, subject });
 
     const html = await generateHtmlEmail({
@@ -28,15 +19,14 @@ export async function handleRequest(req: Request, res: Response, mailProvider: M
       variables,
     });
 
-    const emailOptions: Email = prepareEmailOptions({
+    const email: AppEmail = enreachEmail({
       to,
       subject,
       html,
-      isRejection,
-      attachment,
+      attachments,
     });
 
-    const result = await mailProvider.sendMail(emailOptions);
+    const result = await mailProvider.sendMail(email);
     res.status(200).send(result);
   } catch (error: any) {
     handleError(error, res);
@@ -47,14 +37,14 @@ function validateRequestBody({
   to,
   subject,
   variables,
-  attachment,
+  attachments,
   type,
-}: Partial<EmailRequest>): void {
+}: Partial<SendEmailRequest>): void {
   if (!to || !subject || !variables) {
     throw new Error('Missing "to", "subject", or "variables" in request body');
   }
-  if (type !== 'rejection' && !attachment) {
-    throw new Error('Missing "attachment" in request body for non-refusal types');
+  if (type !== 'rejection' && !Array.isArray(attachments)) {
+    throw new Error('Missing "attachment as array" in request body for non-rejection types');
   }
 }
 
@@ -64,19 +54,17 @@ function logMailSending({ subject, to }: { subject: string; to: string }) {
   });
 }
 
-function prepareEmailOptions({
+function enreachEmail({
   to,
   subject,
   html,
-  isRejection,
-  attachment,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
-  isRejection: boolean;
-  attachment?: { content: string; filename: string };
-}): Email {
+  attachments: AppAttachment[];
+}): AppEmail {
   return {
     to,
     subject,
@@ -90,21 +78,19 @@ function prepareEmailOptions({
       email: process.env.FROM_EMAIL || '',
       name: process.env.FROM_NAME || '',
     },
-    attachments: isRejection
-      ? []
-      : [
-          {
-            content: attachment?.content || '',
-            filename: attachment?.filename || '',
-            disposition: 'attachment',
-            type: 'application/pdf',
-          },
-        ],
+    attachments,
   };
 }
 
 function handleError(error: Error, res: Response): void {
   logger.error({ message: error.message, stack: error.stack });
-  const statusCode = error.message.includes('Missing') ? 400 : 500;
+
+  const errorMessage = error.message;
+  let statusCode = 500;
+
+  if (typeof errorMessage === 'string' && errorMessage.includes('Missing')) {
+    statusCode = 400;
+  }
+
   res.status(statusCode).send(error.message);
 }

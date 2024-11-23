@@ -10,23 +10,13 @@ export function checkApiKey(req: Request, res: any, next: NextFunction) {
     return res.status(500).send('Server configuration error');
   }
 
-  if (!apiKey) {
-    logger.warn({
-      message: 'No API key provided',
-      method: req.method,
-      url: req.originalUrl,
-      headers: Object.keys(req.headers), // Log only header keys, not values
-    });
-    return res.status(401).send('Access denied: No API key provided');
-  }
-
   if (apiKey !== process.env.API_KEY) {
     logger.warn({
-      message: 'Invalid API key provided',
+      message: 'Invalid or missing API key',
       method: req.method,
       url: req.originalUrl,
     });
-    return res.status(403).send('Access denied: Invalid API key');
+    return res.status(401).send('Access denied: Invalid or missing API key');
   }
 
   logger.info({

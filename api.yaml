@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Mail API
+  description: An API to handle email requests using SendGrid.
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Render the API home page.
+      responses:
+        '200':
+          description: HTML home page rendered successfully.
+        '500':
+          description: Internal server error.
+  /send-mail:
+    post:
+      summary: Send an email.
+      description: Processes an email request and sends it using SendGrid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [offer, invoice, rejection]
+                  description: Type of the email.
+                to:
+                  type: string
+                  format: email
+                  description: Recipient's email address.
+                subject:
+                  type: string
+                  description: Subject of the email.
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Key-value pairs to personalize the email.
+                attachments:
+                  type: array
+                  items:
+                    $ref:  '#/components/schemas/AppAttachment'
+              required:
+                - type
+                - to
+                - subject
+      responses:
+        '200':
+          description: Email sent successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email sent successfully.
+        '400':
+          description: Bad request. Input validation failed.
+        '401':
+          description: "Access denied: Invalid or missing API key"
+        '500':
+          description: Internal server error.
+      security:
+        - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    AppAttachment:
+      type: object
+      properties:
+        fileName:
+          type: string
+        content:
+          type: string
+      required:
+        - fileName
+        - content
