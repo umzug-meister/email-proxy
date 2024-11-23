@@ -88,7 +88,7 @@ function handleError(error: Error, res: Response): void {
   const errorMessage = error.message;
   let statusCode = 500;
 
-  if (typeof error.message === 'string' && error.message.includes('Missing')) {
+  if (typeof errorMessage === 'string' && errorMessage.includes('Missing')) {
     statusCode = 400;
   }
 
