@@ -1,6 +1,7 @@
 import { handleRequest } from './mailRequestHandler';
 import { checkApiKey } from './middleware/checkApiKey';
 import { jsonParser } from './middleware/jsonParser';
+import { MailJetMailProvider } from './provider/MailJetMailProvider';
 import { SendGridMailProvider } from './provider/SendGridMailProvider';
 import { SendEmailRequest } from './types';
 import { logger } from './utils/logger';
@@ -50,7 +51,8 @@ app
 app.use(express.json({ limit: JSON_LIMIT }));
 
 // Email Provider
-const mailProvider = new SendGridMailProvider();
+// const mailProvider = new SendGridMailProvider();
+const mailProvider = new MailJetMailProvider();
 
 // Views
 app.set('view engine', 'ejs');
