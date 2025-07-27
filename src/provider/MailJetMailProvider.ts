@@ -36,6 +36,10 @@ export class MailJetMailProvider implements MailProvider {
       });
   }
 
+  public getName(): string {
+    return 'MailJet';
+  }
+
   private convertToProviderMail(email: AppEmail) {
     return {
       Messages: [

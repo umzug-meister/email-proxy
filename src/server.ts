@@ -54,6 +54,10 @@ app.use(express.json({ limit: JSON_LIMIT }));
 // const mailProvider = new SendGridMailProvider();
 const mailProvider = new MailJetMailProvider();
 
+logger.info({
+  message: `Using mail provider: ${mailProvider.getName()}`,
+});
+
 // Views
 app.set('view engine', 'ejs');
 app.set('views', './src/views');

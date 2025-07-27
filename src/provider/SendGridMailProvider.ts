@@ -35,6 +35,10 @@ export class SendGridMailProvider implements MailProvider {
     }
   }
 
+  public getName(): string {
+    return 'SendGrid';
+  }
+
   private convertToProviderMail(email: AppEmail): MailDataRequired {
     return {
       to: email.to,
