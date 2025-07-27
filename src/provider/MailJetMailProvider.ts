@@ -1,4 +1,5 @@
 import { AppEmail } from '../types';
+import { logger } from '../utils/logger';
 import { MailProvider } from './MailProvider';
 
 import Mailjet, { Message } from 'node-mailjet';
@@ -21,7 +22,7 @@ export class MailJetMailProvider implements MailProvider {
     return request
       .then(() => {
         const logMessage = `MailJet: Email sent successfully`;
-        console.info({
+        logger.info({
           message: logMessage,
           subject: email.subject,
           to: email.to,
