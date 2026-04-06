@@ -45,6 +45,7 @@ add_action( 'init', 'umconf_register_acf2' );
 add_action( 'init', 'umconf_add_code_block' );
 add_action( 'init', 'umconf_register_cpt', 0 );
 add_action( 'init', 'umconf_register_ct', 0 );
+add_action( 'init', 'umconf_start_session', 1 );
 add_filter( 'page_template', 'umconf_page_template' );
 add_action( 'template_redirect', 'umconf_admin_html' );
 add_action( 'template_redirect', 'umconf_redirects' );
@@ -81,13 +82,18 @@ function umconf_page_template( $page_template ) {
 }
 
 /**
+ * Start session early.
+ */
+function umconf_start_session() {
+	if ( session_status() === PHP_SESSION_NONE ) {
+		session_start();
+	}
+}
+
+/**
  * Redirect to login if not logged in.
  */
 function umconf_redirects() {
-
-	if ( ! isset( $_SESSION ) ) {
-		session_start();
-	}
 
 	if ( is_page( intval( get_option( '_umconf_page_for_configurator_admin' ) ) ) && ! is_user_logged_in() ) {
 		wp_safe_redirect( wp_login_url( get_permalink( intval( get_option( '_umconf_page_for_configurator_admin' ) ) ) ), 302 );
@@ -1135,9 +1141,26 @@ function umconf_end_buffering( $content ) {
 
 	$html = str_get_html( $content );
 
-	$html->find( '.header-wrapper', 0 )->outertext = '';
-	$html->find( '.main', 0 )->outertext           = '<div id="um-configurator-admin" class="um-configurator-admin"></div>';
-	$html->find( '.footer', 0 )->outertext         = '';
+	$header = $html->find( 'header.header', 0 );
+	if ( null !== $header ) {
+		$header->outertext = '';
+	}
+
+	$main = $html->find( 'main[role=main]', 0 );
+	if ( null !== $main ) {
+		$main->outertext = '<div id="um-configurator-admin" class="um-configurator-admin"></div>';
+	}
+
+	$sidebar = $html->find( 'aside.sidebar', 0 );
+	if ( null !== $sidebar ) {
+		$sidebar->outertext = '';
+	}
+
+	$footer = $html->find( 'footer.footer', 0 );
+	if ( null !== $footer ) {
+		$footer->outertext = '';
+	}
+
 	return $html;
 }
 
