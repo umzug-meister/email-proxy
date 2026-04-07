@@ -228,7 +228,7 @@ function umconf_get_inputinformations( $request ) {
 
 	$request = null;
 
-	if ( ! isset( $_SESSION ) ) {
+	if ( session_status() === PHP_SESSION_NONE ) {
 		session_start();
 	}
 
@@ -254,7 +254,7 @@ function umconf_get_inputinformations( $request ) {
  */
 function umconf_put_inputinformations( $request ) {
 
-	if ( ! isset( $_SESSION ) ) {
+	if ( session_status() === PHP_SESSION_NONE ) {
 		session_start();
 	}
 	$_SESSION['umconf'] = array();
@@ -493,7 +493,7 @@ function umconf_get_place_details( $place_id ) {
  * @return int Amount attempts.
  */
 function umconf_get_attempts( $address ) {
-	if ( ! isset( $_SESSION ) ) {
+	if ( session_status() === PHP_SESSION_NONE ) {
 		session_start();
 	}
 
