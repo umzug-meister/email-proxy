@@ -21,13 +21,9 @@ defined( 'UMZUGKONFADMIN_SLUG' ) || define( 'UMZUGKONFADMIN_SLUG', 'konfigurator
 defined( 'UM_CONFIG_DO_AUTH' ) || define( 'UM_CONFIG_DO_AUTH',  'local'  !== wp_get_environment_type() );
 define( 'UM_CONFIG_OPTION_GROUP', '_ummei' );
 define( 'UM_CONFIG_OPTION_PAGE', 'ummei' );
-define( 'UM_CONFIG_OPTION_GOOGLE_API', '_umconf_google_api' );
-define( 'UM_CONFIG_OPTION_PLACE_NAME', '_umconf_placename' );
-define( 'UM_CONFIG_OPTION_PLACE_ID', '_umconf_placeid' );
 define( 'UM_CONFIG_OPTION_EMAIL', '_umconf_opt_companyEmail' );
 define( 'UM_CONFIG_OPTION_EMAIL_FROM', '_umconf_opt_emailFromName' );
 define( 'UM_CONFIG_OPTION_EMAIL_FROM_ADDRESS', '_umconf_opt_emailFrom' );
-define( 'UM_CONFIG_OPTION_PAGE_FOR_SUCCESS', '_umconf_page_for_success' );
 define( 'UM_CONFIG_OPTION_PREFIX', '_umconf_opt_' );
 
 
@@ -45,10 +41,7 @@ add_action( 'init', 'umconf_register_acf2' );
 add_action( 'init', 'umconf_add_code_block' );
 add_action( 'init', 'umconf_register_cpt', 0 );
 add_action( 'init', 'umconf_register_ct', 0 );
-add_action( 'init', 'umconf_start_session', 1 );
-add_filter( 'page_template', 'umconf_page_template' );
 add_action( 'template_redirect', 'umconf_admin_html' );
-add_action( 'template_redirect', 'umconf_redirects' );
 add_action( 'admin_head', 'umconf_add_custom_js' );
 add_action( 'wp_head', 'umconf_add_custom_js' );
 add_filter( 'wp_mail_content_type', 'umconf_set_html_mail_content_type' );
@@ -57,7 +50,6 @@ remove_filter( 'the_title', 'wptexturize' );
 remove_filter( 'the_content', 'wptexturize' );
 
 // Endpoints declaration.
-require 'inc/general-endpoints.php';
 require 'inc/item-categories-endpoints.php';
 require 'inc/service-categories-endpoints.php';
 require 'inc/items-endpoints.php';
@@ -66,54 +58,6 @@ require 'inc/orders-endpoints.php';
 require 'inc/simple_html_dom.php';
 
 // Functions.
-
-/**
- * Replace template of the success page.
- *
- * @param string $page_template Template name.
- *
- * @return string New template name.
- */
-function umconf_page_template( $page_template ) {
-	if ( is_page( intval( get_option( UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ) ) ) ) {
-		$page_template = dirname( __FILE__ ) . '/custom-success-page-template.php';
-	}
-	return $page_template;
-}
-
-/**
- * Start session early.
- */
-function umconf_start_session() {
-	if ( session_status() === PHP_SESSION_NONE ) {
-		session_start();
-	}
-}
-
-/**
- * Redirect to login if not logged in.
- */
-function umconf_redirects() {
-
-	if ( is_page( intval( get_option( '_umconf_page_for_configurator_admin' ) ) ) && ! is_user_logged_in() ) {
-		wp_safe_redirect( wp_login_url( get_permalink( intval( get_option( '_umconf_page_for_configurator_admin' ) ) ) ), 302 );
-		exit();
-	}
-
-	if ( is_page( intval( get_option( '_umconf_page_for_configurator' ) ) ) && ! isset( $_SESSION['umconf'] ) ) {
-		wp_safe_redirect( home_url(), 302 );
-		exit();
-	}
-
-	// phpcs:disable
-	if ( is_page( intval( get_option( UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ) ) )
-			&& ( ! isset( $_COOKIE['umconf-status'] ) || 1 !== intval( $_COOKIE['umconf-status'] ) )
-	) {
-		wp_safe_redirect( home_url(), 302 );
-		exit();
-	}
-	// phpcs:enable
-}
 
 /**
  * Adds filter parameters to query args
@@ -248,10 +192,6 @@ function umconf_body_class( $classes ) {
 		$classes[] = 'page-umzugmeister-configurator-admin';
 	}
 
-	if ( is_page( intval( get_option( UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ) ) ) ) {
-		$classes[] = 'page-content-fullwidth';
-	}
-
 	return $classes;
 }
 
@@ -293,16 +233,6 @@ function umconf_add_configurator_status( $states, $post ) {
 	) {
 		$states['_umconf_page_for_configurator'] = __(
 			'Seite für Konfigurator',
-			'um-configurator'
-		);
-	}
-
-	if (
-		intval( get_option( UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ) )
-		=== $post->ID
-	) {
-		$states[ UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ] = __(
-			'Danke-Seite',
 			'um-configurator'
 		);
 	}
@@ -390,7 +320,6 @@ function umconf_include_assets() {
 		'configuratorUrl'      => get_permalink( intval( get_option( '_umconf_page_for_configurator' ) ) ),
 		'configuratorAdminUrl' => get_permalink( intval( get_option( '_umconf_page_for_configurator_admin' ) ) ),
 		'pluginDir'            => plugin_dir_url( __FILE__ ),
-		'successUrl'           => get_permalink( intval( get_option( UM_CONFIG_OPTION_PAGE_FOR_SUCCESS ) ) ),
 		'nonce'                => wp_create_nonce( 'wp_rest' ),
 	);
 	wp_localize_script( 'um-configurator', 'UMCONFUrls', $translation_array );
@@ -466,38 +395,6 @@ function umconf_register_settings() {
 
 	register_setting(
 		UM_CONFIG_OPTION_GROUP,
-		UM_CONFIG_OPTION_GOOGLE_API,
-		array(
-			'type' => 'string',
-		)
-	);
-
-	register_setting(
-		UM_CONFIG_OPTION_GROUP,
-		UM_CONFIG_OPTION_PLACE_NAME,
-		array(
-			'type' => 'string',
-		)
-	);
-
-	register_setting(
-		UM_CONFIG_OPTION_GROUP,
-		UM_CONFIG_OPTION_PLACE_ID,
-		array(
-			'type' => 'string',
-		)
-	);
-
-	register_setting(
-		UM_CONFIG_OPTION_GROUP,
-		UM_CONFIG_OPTION_PAGE_FOR_SUCCESS,
-		array(
-			'type' => 'integer',
-		)
-	);
-
-	register_setting(
-		UM_CONFIG_OPTION_GROUP,
 		UM_CONFIG_OPTION_EMAIL,
 		array(
 			'type' => 'string',
@@ -527,46 +424,6 @@ function umconf_register_settings() {
 			include 'inc/configurator-settings-section.php';
 		},
 		UM_CONFIG_OPTION_PAGE
-	);
-
-	add_settings_field(
-		UM_CONFIG_OPTION_GOOGLE_API,
-		__( 'Google API-Key', 'um-configurator' ),
-		function() {
-			include 'inc/configurator-settings-fields.php';
-		},
-		UM_CONFIG_OPTION_PAGE,
-		UM_CONFIG_OPTION_GROUP
-	);
-
-	add_settings_field(
-		UM_CONFIG_OPTION_PLACE_NAME,
-		__( 'Standort-Adresse', 'um-configurator' ),
-		function() {
-			include 'inc/configurator-settings-fields-place-name.php';
-		},
-		UM_CONFIG_OPTION_PAGE,
-		UM_CONFIG_OPTION_GROUP
-	);
-
-	add_settings_field(
-		UM_CONFIG_OPTION_PLACE_ID,
-		__( 'Standort-ID (wird automatisch ausgefüllt)', 'um-configurator' ),
-		function() {
-			include 'inc/configurator-settings-fields-place-id.php';
-		},
-		UM_CONFIG_OPTION_PAGE,
-		UM_CONFIG_OPTION_GROUP
-	);
-
-	add_settings_field(
-		UM_CONFIG_OPTION_PAGE_FOR_SUCCESS,
-		__( 'Danke-Seite', 'um-configurator' ),
-		function() {
-			include 'inc/configurator-settings-fields-success-page.php';
-		},
-		UM_CONFIG_OPTION_PAGE,
-		UM_CONFIG_OPTION_GROUP
 	);
 
 	add_settings_field(
@@ -1179,11 +1036,8 @@ function umconf_backend_scripts() {
 
 	// Localize the script with new data.
 	$translation_array = array(
-		'googleApi'          => get_option( UM_CONFIG_OPTION_GOOGLE_API ),
-		'placeIdElementId'   => esc_attr( UM_CONFIG_OPTION_PLACE_ID ),
-		'placeNameElementId' => esc_attr( UM_CONFIG_OPTION_PLACE_NAME ),
-		'baseUrl'            => get_rest_url(),
-		'nonce'              => wp_create_nonce( 'wp_rest' ),
+		'baseUrl' => get_rest_url(),
+		'nonce'   => wp_create_nonce( 'wp_rest' ),
 	);
 	wp_localize_script( 'um-configurator-admin', 'UMCONFADMIN', $translation_array );
 }
