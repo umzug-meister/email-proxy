@@ -1,7 +1,7 @@
 {
   "name": "email-proxy",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "build/server.js",
   "scripts": {
     "start": "node build/server.js",
     "dev": "npx nodemon",
