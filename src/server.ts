@@ -6,6 +6,8 @@ import { SendGridMailProvider } from './provider/SendGridMailProvider';
 import { SendEmailRequest } from './types';
 import { logger } from './utils/logger';
 
+import path from 'path';
+
 import cors from 'cors';
 import 'dotenv/config';
 import express, { Request } from 'express';
@@ -60,7 +62,7 @@ logger.info({
 
 // Views
 app.set('view engine', 'ejs');
-app.set('views', './src/views');
+app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (_, res) => {
