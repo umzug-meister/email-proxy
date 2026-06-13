@@ -10,19 +10,13 @@ type Variables = {
   [key: string]: string;
 };
 export async function generateHtmlEmail({
-  includeAdvertisement,
   variables,
 }: {
-  includeAdvertisement: boolean;
   variables: Variables;
 }) {
   const emailTemplate = await readHtmlTemplate('email');
-  let advertisement = '';
-  if (includeAdvertisement) {
-    advertisement = await readHtmlTemplate('advertisement');
-  }
 
-  const html = replaceTemplateVariables(emailTemplate, { advertisement, ...variables });
+  const html = replaceTemplateVariables(emailTemplate, variables);
 
   // optimize for email clients
   return inline(html, { keepStyleTags: true });
