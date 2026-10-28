@@ -28,7 +28,7 @@
     "winston": "^3.16.0"
   },
   "engines": {
-    "node": "22",
+    "node": "24",
     "npm": "10"
   },
   "devDependencies": {
